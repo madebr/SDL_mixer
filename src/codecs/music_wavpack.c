@@ -21,7 +21,7 @@
 
 #if defined(MUSIC_WAVPACK)
 
-#define WAVPACK_DBG 1
+#define WAVPACK_DBG 0
 
 /* This file supports WavPack music streams */
 
