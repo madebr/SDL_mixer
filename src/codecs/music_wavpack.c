@@ -70,7 +70,6 @@ typedef struct {
     WavpackContext *(*WavpackOpenFileInputEx)(WavpackStreamReader *reader, void *wv_id, void *wvc_id, char *error, int flags, int norm_offset);
     WavpackContext *(*WavpackCloseFile)(WavpackContext*);
     int (*WavpackGetMode)(WavpackContext*);
-    int (*WavpackGetBitsPerSample)(WavpackContext*);
     int (*WavpackGetBytesPerSample)(WavpackContext*);
     int (*WavpackGetNumChannels)(WavpackContext*);
     uint32_t (*WavpackGetNumSamples)(WavpackContext*);
@@ -113,7 +112,6 @@ static int WAVPACK_Load(void)
         FUNCTION_LOADER(WavpackOpenFileInputEx, WavpackContext *(*)(WavpackStreamReader*, void*, void*, char*, int, int));
         FUNCTION_LOADER(WavpackCloseFile, WavpackContext *(*)(WavpackContext*));
         FUNCTION_LOADER(WavpackGetMode, int (*)(WavpackContext*));
-        FUNCTION_LOADER(WavpackGetBitsPerSample, int (*)(WavpackContext*));
         FUNCTION_LOADER(WavpackGetBytesPerSample, int (*)(WavpackContext*));
         FUNCTION_LOADER(WavpackGetNumChannels, int (*)(WavpackContext*));
         FUNCTION_LOADER(WavpackGetNumSamples, uint32_t (*)(WavpackContext*));
@@ -187,9 +185,7 @@ typedef struct {
     WavpackContext *ctx;
     int64_t numsamples;
     uint32_t samplerate;
-    int bytespersample;
-    int bitspersample;
-    int channels, mode;
+    int bps, channels, mode;
 
     SDL_AudioStream *stream;
     int32_t *buffer;
@@ -368,8 +364,7 @@ static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int
                          wvpk.WavpackGetNumSamples64(music->ctx) :
                          wvpk.WavpackGetNumSamples(music->ctx);
     music->samplerate = wvpk.WavpackGetSampleRate(music->ctx);
-    music->bytespersample = wvpk.WavpackGetBytesPerSample(music->ctx);
-    music->bitspersample = music->bytespersample << 3; /* wvpk.WavpackGetBitsPerSample(music->ctx) */
+    music->bps = wvpk.WavpackGetBytesPerSample(music->ctx) << 3;
     music->channels = wvpk.WavpackGetNumChannels(music->ctx);
     music->mode = wvpk.WavpackGetMode(music->ctx);
 
@@ -377,25 +372,10 @@ static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int
        *freesrc2 = 0; /* WAVPACK_Delete() will free it. */
     }
 
-#if WAVPACK_DBG
-    SDL_Log("WavPack loader:\n"
-            "numsamples: %lld\n"
-            "samplerate: %d\n"
-            "bytespersample: %d\n"
-            "bitspersample: %d\n"
-            "channels: %d\n"
-            "mode: 0x%x\n"
-            "lossy: %d\n"
-            "duration: %f\n",
-            music->numsamples,
-            music->samplerate,
-            music->bytespersample,
-            music->bitspersample,
-            music->channels,
-            music->mode,
-            !(music->mode & MODE_LOSSLESS),
-            music->numsamples / (double)music->samplerate);
-#endif
+    #if WAVPACK_DBG
+    SDL_Log("WavPack loader:\n numsamples: %" SDL_PRIs64 "\n samplerate: %d\n bitspersample: %d\n channels: %d\n mode: 0x%x\n lossy: %d\n duration: %f\n",
+            (Sint64)music->numsamples, music->samplerate, music->bps, music->channels, music->mode, !(music->mode & MODE_LOSSLESS), music->numsamples/(double)music->samplerate);
+    #endif
 
     format = (music->mode & MODE_FLOAT) ? AUDIO_F32SYS : AUDIO_S32SYS;
     music->stream = SDL_NewAudioStream(format, (Uint8)music->channels, (int)music->samplerate,
@@ -498,8 +478,8 @@ static int WAVPACK_GetSome(void *context, void *data, int bytes, SDL_bool *done)
     amount = (int) wvpk.WavpackUnpackSamples(music->ctx, music->buffer, music->frames);
     if (amount) {
         amount *= music->channels;
-        if (music->bitspersample < 32) {
-            const int shift = 32 - music->bitspersample;
+        if (music->bps < 32) {
+            const int shift = 32 - music->bps;
             int c = 0;
             for (; c < amount; ++c) {
                 music->buffer[c] <<= shift;
