@@ -287,21 +287,55 @@ static WavpackStreamReader64 sdl_reader64 = {
 
 static int WAVPACK_Seek(void *context, double time);
 static void WAVPACK_Delete(void *context);
-static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int freesrc);
+static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int freesrc, int *freesrc2);
 
 static void *WAVPACK_CreateFromRW(SDL_RWops *src, int freesrc)
 {
-    return WAVPACK_CreateFromRW_internal(src, NULL, freesrc);
+    return WAVPACK_CreateFromRW_internal(src, NULL, freesrc, NULL);
 }
 
-/* Open correction file (file.wvc) along with file.wv
 static void *WAVPACK_CreateFromFile(const char *file)
 {
-    return WAVPACK_CreateFromRW_internal(src1, src2, 1);
-}*/
+    SDL_RWops *src1, *src2;
+    WAVPACK_music *music;
+    int freesrc2 = 1;
+    size_t len;
+    char *file2;
+
+    src1 = SDL_RWFromFile(file, "rb");
+    if (!src1) {
+        Mix_SetError("Couldn't open '%s'", file);
+        return NULL;
+    }
+
+    len = SDL_strlen(file);
+    file2 = SDL_stack_alloc(char, len + 2);
+    if (!file2) src2 = NULL;
+    else {
+        SDL_memcpy(file2, file, len);
+        file2[len] =  'c';
+        file2[len + 1] = '\0';
+        src2 = SDL_RWFromFile(file2, "rb");
+        #if WAVPACK_DBG
+        if (src2) {
+            SDL_Log("Loaded WavPack correction file %s", file2);
+        }
+        #endif
+        SDL_stack_free(file2);
+    }
+
+    music = WAVPACK_CreateFromRW_internal(src1, src2, 1, &freesrc2);
+    if (!music) {
+        SDL_RWclose(src1);
+        if (freesrc2) {
+            SDL_RWclose(src2);
+        }
+    }
+    return music;
+}
 
 /* Load a WavPack stream from an SDL_RWops object */
-static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int freesrc)
+static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int freesrc, int *freesrc2)
 {
     WAVPACK_music *music;
     SDL_AudioFormat format;
@@ -339,6 +373,10 @@ static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int
     music->channels = wvpk.WavpackGetNumChannels(music->ctx);
     music->mode = wvpk.WavpackGetMode(music->ctx);
 
+    if (freesrc2) {
+       *freesrc2 = 0; /* WAVPACK_Delete() will free it. */
+    }
+
 #if WAVPACK_DBG
     SDL_Log("WavPack loader:\n"
             "numsamples: %lld\n"
@@ -347,6 +385,7 @@ static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int
             "bitspersample: %d\n"
             "channels: %d\n"
             "mode: 0x%x\n"
+            "lossy: %d\n"
             "duration: %f\n",
             music->numsamples,
             music->samplerate,
@@ -354,6 +393,7 @@ static void *WAVPACK_CreateFromRW_internal(SDL_RWops *src1, SDL_RWops *src2, int
             music->bitspersample,
             music->channels,
             music->mode,
+            !(music->mode & MODE_LOSSLESS),
             music->numsamples / (double)music->samplerate);
 #endif
 
@@ -553,7 +593,7 @@ Mix_MusicInterface Mix_MusicInterface_WAVPACK =
     WAVPACK_Load,
     NULL,   /* Open */
     WAVPACK_CreateFromRW,
-    NULL, /*WAVPACK_CreateFromFile*/
+    WAVPACK_CreateFromFile,
     WAVPACK_SetVolume,
     WAVPACK_GetVolume,
     WAVPACK_Play,
