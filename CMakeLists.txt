@@ -756,10 +756,7 @@ if(SDL2MIXER_WAVE)
 endif()
 
 if(SDL2MIXER_WAVPACK)
-    target_compile_definitions(SDL2_mixer PRIVATE
-        MUSIC_WAVPACK
-        HAVE_WAVPACK_H
-    )
+    target_compile_definitions(SDL2_mixer PRIVATE MUSIC_WAVPACK)
     if(SDL2MIXER_VENDORED)
         message(STATUS "Using vendored WevPack")
         sdl_check_project_in_subfolder(external/wavpack WavPack SDL2MIXER_VENDORED)
@@ -775,6 +772,7 @@ if(SDL2MIXER_WAVPACK)
         if(NOT SDL2MIXER_WAVPACK_SHARED)
             list(APPEND PC_LIBS -l$<TARGET_FILE_BASE_NAME:WavPack::WavPack>)
         endif()
+        target_compile_definitions(SDL2_mixer PRIVATE HAVE_WAVPACK_H)
     else()
         message(STATUS "Using system WavPack")
         find_package(wavpack REQUIRED)

@@ -10,8 +10,7 @@ find_library(wavpack_LIBRARY
 )
 
 find_path(wavpack_INCLUDE_PATH
-    NAMES wavpack.h
-    PATH_SUFFIXES wavpack
+    NAMES wavpack/wavpack.h
 )
 
 set(wavpack_COMPILE_OPTIONS "" CACHE STRING "Extra compile options of wavpack")
