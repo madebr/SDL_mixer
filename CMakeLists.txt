@@ -285,6 +285,9 @@ set_target_properties(${sdl3_mixer_target_name} PROPERTIES
     EXPORT_NAME ${sdl3_mixer_target_name}
     C_VISIBILITY_PRESET "hidden"
 )
+
+sdl_target_link_option_version_file(${sdl3_mixer_target_name} "${CMAKE_CURRENT_SOURCE_DIR}/src/SDL_mixer.sym")
+
 if(NOT ANDROID)
     set_target_properties(${sdl3_mixer_target_name} PROPERTIES
         SOVERSION "${SO_VERSION_MAJOR}"
@@ -322,8 +325,6 @@ endif()
 if(SDLMIXER_BUILD_SHARED_LIBS)
     sdl_target_link_options_no_undefined(${sdl3_mixer_target_name})
 endif()
-
-sdl_target_link_option_version_file(${sdl3_mixer_target_name} "${CMAKE_CURRENT_SOURCE_DIR}/src/SDL_mixer.sym")
 
 if(SDLMIXER_BUILD_SHARED_LIBS)
     # Make sure static library dependencies are built with -fPIC when building a shared SDL3_mixer
@@ -1068,6 +1069,14 @@ if(SDLMIXER_INSTALL)
         "${CMAKE_CURRENT_SOURCE_DIR}/include/SDL3_mixer/SDL_mixer.h"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/SDL3_mixer" COMPONENT devel
     )
+    if(BUILD_SHARED_LIBS)
+        set(pdbdir "${CMAKE_INSTALL_BINDIR}")
+    else()
+        set(pdbdir "${CMAKE_INSTALL_LIBDIR}")
+    endif()
+    if(MSVC)
+        SDL_install_pdb("${sdl3_mixer_target_name}" "${pdbdir}")
+    endif()
 
     if(INSTALL_EXTRA_TARGETS)
         install(TARGETS ${INSTALL_EXTRA_TARGETS}
@@ -1075,6 +1084,11 @@ if(SDLMIXER_INSTALL)
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT library
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT library
         )
+        if(MSVC)
+            foreach(tgt IN LISTS INSTALL_EXTRA_TARGETS)
+                SDL_install_pdb("${tgt}" "${pdbdir}")
+            endforeach()
+        endif()
     endif()
 
     if(WIN32 AND NOT MINGW)
@@ -1094,6 +1108,7 @@ if(SDLMIXER_INSTALL)
     endif()
 
     configure_package_config_file(cmake/SDL3_mixerConfig.cmake.in SDL3_mixerConfig.cmake
+        NO_SET_AND_CHECK_MACRO
         INSTALL_DESTINATION "${SDLMIXER_INSTALL_CMAKEDIR}"
     )
     write_basic_package_version_file("${PROJECT_BINARY_DIR}/SDL3_mixerConfigVersion.cmake"
@@ -1103,24 +1118,31 @@ if(SDLMIXER_INSTALL)
         FILES
             "${CMAKE_CURRENT_BINARY_DIR}/SDL3_mixerConfig.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/SDL3_mixerConfigVersion.cmake"
-            "${CMAKE_CURRENT_LIST_DIR}/cmake/PkgConfigHelper.cmake"
-            cmake/FindFLAC.cmake
-            cmake/FindFluidSynth.cmake
-            cmake/Findgme.cmake
-            cmake/Findlibxmp.cmake
-            cmake/Findlibxmp-lite.cmake
-            cmake/Findmodplug.cmake
-            cmake/FindOgg.cmake
-            cmake/FindOpus.cmake
-            cmake/FindOpusFile.cmake
-            cmake/Findmpg123.cmake
-            cmake/FindVorbis.cmake
-            cmake/Findtremor.cmake
-            cmake/Findwavpack.cmake
-            cmake/FindSndFile.cmake
-        DESTINATION "${SDLMIXER_INSTALL_CMAKEDIR}"
-        COMPONENT devel
+          DESTINATION "${SDLMIXER_INSTALL_CMAKEDIR}"
+          COMPONENT devel
     )
+    if(NOT SDLMIXER_VENDORED)
+        install(
+            FILES
+                cmake/PkgConfigHelper.cmake
+                cmake/FindFLAC.cmake
+                cmake/FindFluidSynth.cmake
+                cmake/Findgme.cmake
+                cmake/Findlibxmp.cmake
+                cmake/Findlibxmp-lite.cmake
+                cmake/Findmodplug.cmake
+                cmake/FindOgg.cmake
+                cmake/FindOpus.cmake
+                cmake/FindOpusFile.cmake
+                cmake/Findmpg123.cmake
+                cmake/FindVorbis.cmake
+                cmake/Findtremor.cmake
+                cmake/Findwavpack.cmake
+                cmake/FindSndFile.cmake
+            DESTINATION "${SDLMIXER_INSTALL_CMAKEDIR}"
+            COMPONENT devel
+        )
+    endif()
     install(EXPORT SDL3MixerTargets
         FILE ${sdl3_mixer_target_name}-targets.cmake
         NAMESPACE SDL3_mixer::
