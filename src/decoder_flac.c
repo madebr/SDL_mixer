@@ -71,6 +71,7 @@ typedef struct FLAC_TrackData
 
 static FLAC__StreamDecoderReadStatus FLAC_IoRead(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *userdata)
 {
+    (void) decoder;
     if (*bytes > 0) {
         FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
         *bytes = SDL_ReadIO(tdata->io, buffer, *bytes);
@@ -87,6 +88,7 @@ static FLAC__StreamDecoderReadStatus FLAC_IoRead(const FLAC__StreamDecoder *deco
 static FLAC__StreamDecoderSeekStatus FLAC_IoSeek(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *userdata)
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
+    (void) decoder;
     if (SDL_SeekIO(tdata->io, (Sint64)absolute_byte_offset, SDL_IO_SEEK_SET) < 0) {
         return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
     }
@@ -97,6 +99,7 @@ static FLAC__StreamDecoderTellStatus FLAC_IoTell(const FLAC__StreamDecoder *deco
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
     const Sint64 pos = SDL_TellIO(tdata->io);
+    (void) decoder;
     if (pos < 0) {
         return FLAC__STREAM_DECODER_TELL_STATUS_ERROR;
     }
@@ -108,6 +111,7 @@ static FLAC__StreamDecoderLengthStatus FLAC_IoLength(const FLAC__StreamDecoder *
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
     const Sint64 iolen = SDL_GetIOSize(tdata->io);
+    (void) decoder;
     if (iolen < 0) {
         return FLAC__STREAM_DECODER_LENGTH_STATUS_ERROR;
     }
@@ -118,11 +122,16 @@ static FLAC__StreamDecoderLengthStatus FLAC_IoLength(const FLAC__StreamDecoder *
 static FLAC__bool FLAC_IoEOF(const FLAC__StreamDecoder *decoder, void *userdata)
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
+    (void) decoder;
     return SDL_TellIO(tdata->io) >= SDL_GetIOSize(tdata->io);
 }
 
 static FLAC__StreamDecoderWriteStatus FLAC_IoWriteNoOp(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 *const buffer[], void *userdata)
 {
+    (void) decoder;
+    (void) frame;
+    (void) buffer;
+    (void) userdata;
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;  // we don't need this data at this moment.
 }
 
@@ -133,6 +142,7 @@ static FLAC__StreamDecoderWriteStatus FLAC_IoWrite(const FLAC__StreamDecoder *de
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
     SDL_AudioStream *stream = tdata->stream;
     const int channels = (int) frame->header.channels;
+    (void) decoder;
 
     // !!! FIXME: this is kinda gross, but FLAC 3-channel is FL, FR, FC, whereas SDL is FL, FR, LFE...we don't have a "front center" channel until 5.1 output.  :/  The channel mask thing Sam wants in SDL3 would fix this.
     const int sdlchannels = (channels == 3) ? 6 : channels;
@@ -249,6 +259,7 @@ static void FLAC_IoMetadata(const FLAC__StreamDecoder *decoder, const FLAC__Stre
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) userdata;
     FLAC_AudioData *adata = (FLAC_AudioData *) tdata->adata;  // cast away constness here. This metadata callback is when we're initializing adata.
+    (void) decoder;
 
     if (metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
         tdata->spec.freq = metadata->data.stream_info.sample_rate;
@@ -280,11 +291,17 @@ static void FLAC_IoMetadata(const FLAC__StreamDecoder *decoder, const FLAC__Stre
 static void FLAC_IoError(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data)
 {
     // (currently) don't care.
+    (void) decoder;
+    (void) status;
+    (void) client_data;
 }
 
 static void FLAC_IoMetadataNoOp(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *userdata)
 {
     // don't care about metadata at this point.
+    (void) decoder;
+    (void) metadata;
+    (void) userdata;
 }
 
 static bool SDLCALL FLAC_init(void)
@@ -385,6 +402,7 @@ static bool SDLCALL FLAC_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, SDL_P
 static bool SDLCALL FLAC_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     FLAC_TrackData *tdata = (FLAC_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

@@ -320,6 +320,8 @@ failed:
 static bool SDLCALL MPG123_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     SDL_assert(audio_userdata == NULL);  // no state.
+    (void) spec;
+    (void) props;
 
     int result = 0;
     mpg123_handle *handle = mpg123.mpg123_new(NULL, &result);

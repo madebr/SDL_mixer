@@ -199,6 +199,8 @@ static bool SDLCALL DRFLAC_init_track(void *audio_userdata, SDL_IOStream *io, co
 {
     const DRFLAC_AudioData *adata = (const DRFLAC_AudioData *) audio_userdata;
     DRFLAC_TrackData *tdata = (DRFLAC_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

@@ -46,6 +46,7 @@ typedef struct SINEWAVE_TrackData
 static bool SDLCALL SINEWAVE_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, SDL_PropertiesID props, Sint64 *duration_frames, void **audio_userdata)
 {
     const char *decoder_name = SDL_GetStringProperty(props, MIX_PROP_AUDIO_DECODER_STRING, NULL);
+    (void) io;
     if (!decoder_name || (SDL_strcasecmp(decoder_name, "sinewave") != 0)) {
         return false;
     }
@@ -79,6 +80,9 @@ static bool SDLCALL SINEWAVE_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, S
 static bool SDLCALL SINEWAVE_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     SINEWAVE_TrackData *tdata = (SINEWAVE_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) io;
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

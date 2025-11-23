@@ -189,6 +189,8 @@ static bool SDLCALL STBVORBIS_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, 
 static bool SDLCALL STBVORBIS_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     STBVORBIS_TrackData *tdata = (STBVORBIS_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

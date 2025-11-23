@@ -242,6 +242,7 @@ static void SDLCALL SetCustomFluidsynthProperties(void *userdata, SDL_Properties
 static bool SDLCALL FLUIDSYNTH_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     FLUIDSYNTH_TrackData *tdata = (FLUIDSYNTH_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

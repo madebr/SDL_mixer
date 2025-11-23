@@ -21,11 +21,14 @@ static SDL_IOStream *iopostmix = NULL;
 
 static void SDLCALL WritePCMCallback(void *userdata, MIX_Track *track, const SDL_AudioSpec *spec, float *pcm, int samples)
 {
+    (void) track;
+    (void) spec;
     SDL_WriteIO((SDL_IOStream *) userdata, pcm, samples * sizeof (float));
 }
 
 static void SDLCALL WritePostmixPCMCallback(void *userdata, MIX_Mixer *mixer, const SDL_AudioSpec *spec, float *pcm, int samples)
 {
+    (void) mixer;
     WritePCMCallback(userdata, NULL, spec, pcm, samples);
 }
 
@@ -72,6 +75,7 @@ static void SDLCALL CollectMetadata(void *userdata, SDL_PropertiesID props, cons
 {
     MetadataKeys *mkeys = (MetadataKeys *) userdata;
     char *key = SDL_strdup(name);
+    (void) props;
     if (key) {
         void *ptr = SDL_realloc(mkeys->keys, (mkeys->num_keys + 1) * sizeof (*mkeys->keys));
         if (!ptr) {
@@ -90,6 +94,7 @@ static int SDLCALL CompareMetadataKeys(const void *a, const void *b)
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
+    (void) appstate;
     SDL_SetAppMetadata("Test SDL_mixer", "1.0", "org.libsdl.testmixer");
 #if USE_MIX_GENERATE
     const SDL_AudioSpec spec = { SDL_AUDIO_S16, 2, 48000 };
@@ -210,6 +215,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
+    (void) appstate;
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     }
@@ -218,6 +224,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
+    (void) appstate;
     #if USE_MIX_GENERATE
     float buf[1024];
     if (!MIX_Generate(mixer, buf, sizeof (buf))) {
@@ -246,6 +253,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
+    (void) appstate;
+    (void) result;
     // SDL will clean up the window/renderer for us.
     // SDL_mixer will clean up the tracks and audio.
     MIX_Quit();

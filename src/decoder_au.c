@@ -184,6 +184,8 @@ static bool SDLCALL AU_init_track(void *audio_userdata, SDL_IOStream *io, const 
 {
     const AU_AudioData *adata = (const AU_AudioData *) audio_userdata;
     AU_TrackData *tdata = (AU_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

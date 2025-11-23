@@ -205,6 +205,7 @@ static bool SDLCALL XMP_init_track(void *audio_userdata, SDL_IOStream *io, const
     int err;
 
     XMP_TrackData *tdata = (XMP_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

@@ -83,6 +83,7 @@ static drmp3_bool32 DRMP3_IoTell(void *context, drmp3_int64 *pos)
 static bool SDLCALL DRMP3_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, SDL_PropertiesID props, Sint64 *duration_frames, void **audio_userdata)
 {
     drmp3 decoder;
+    (void) props;
     // do an initial load from the IOStream to get metadata.
     if (!drmp3_init(&decoder, DRMP3_IoRead, DRMP3_IoSeek, DRMP3_IoTell, NULL, io, NULL)) {
         return false;  // probably not an MP3 file.
@@ -136,6 +137,8 @@ static bool SDLCALL DRMP3_init_track(void *audio_userdata, SDL_IOStream *io, con
 {
     const DRMP3_AudioData *adata = (const DRMP3_AudioData *) audio_userdata;
     DRMP3_TrackData *tdata = (DRMP3_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

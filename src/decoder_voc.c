@@ -413,6 +413,7 @@ static bool SDLCALL VOC_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, SDL_Pr
 static bool SDLCALL VOC_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **userdata)
 {
     VOC_TrackData *tdata = (VOC_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

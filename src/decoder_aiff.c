@@ -516,6 +516,8 @@ static bool SDLCALL AIFF_init_track(void *audio_userdata, SDL_IOStream *io, cons
 {
     const AIFF_AudioData *adata = (const AIFF_AudioData *) audio_userdata;
     AIFF_TrackData *tdata = (AIFF_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

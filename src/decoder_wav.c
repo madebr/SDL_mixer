@@ -1049,6 +1049,7 @@ static bool CheckWAVMetadataField(const char *wantedtag, const char *propname, S
 static bool ParseLIST(WAV_AudioData *adata, SDL_IOStream *io, SDL_PropertiesID props, Uint32 chunk_length)
 {
     Uint8 *data = (Uint8 *)SDL_malloc(chunk_length);
+    (void) adata;
     if (!data) {
         return false;
     }
@@ -1348,6 +1349,8 @@ static bool SDLCALL WAV_init_track(void *audio_userdata, SDL_IOStream *io, const
 {
     const WAV_AudioData *adata = (const WAV_AudioData *) audio_userdata;
     WAV_TrackData *tdata = (WAV_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) spec;
+    (void) props;
     if (!tdata) {
         return false;
     }

@@ -478,6 +478,7 @@ failed:
 static bool SDLCALL WAVPACK_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
     WAVPACK_TrackData *tdata = (WAVPACK_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

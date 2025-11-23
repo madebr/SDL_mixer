@@ -69,6 +69,7 @@ static bool SDLCALL TIMIDITY_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, S
 {
     // just load the bare minimum from the IOStream to verify it's a MIDI file.
     char magic[4];
+    (void) props;
     if (SDL_ReadIO(io, magic, 4) != 4) {
         return false;
     } else if (SDL_memcmp(magic, "MThd", 4) != 0) {
@@ -104,6 +105,7 @@ static bool SDLCALL TIMIDITY_init_audio(SDL_IOStream *io, SDL_AudioSpec *spec, S
 
 static bool SDLCALL TIMIDITY_init_track(void *audio_userdata, SDL_IOStream *io, const SDL_AudioSpec *spec, SDL_PropertiesID props, void **track_userdata)
 {
+    (void) props;
     SDL_assert(audio_userdata == NULL);  // no state.
     TIMIDITY_TrackData *tdata = (TIMIDITY_TrackData *) SDL_calloc(1, sizeof (*tdata));
     if (!tdata) {

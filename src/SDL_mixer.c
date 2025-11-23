@@ -331,6 +331,7 @@ static void SDLCALL TrackGetCallback(void *userdata, SDL_AudioStream *stream, in
 {
     MIX_Track *track = (MIX_Track *) userdata;
     SDL_assert(stream == track->output_stream);
+    (void) total_amount;
 
     if (additional_amount == 0) {
         return;  // don't need to generate more audio yet.
@@ -527,6 +528,7 @@ static void MixFloat32Audio(float *dst, const float *src, const int buffer_size,
 // SDL calls this function from the audio device thread as more data is needed the mixer.
 static void SDLCALL MixerCallback(void *userdata, SDL_AudioStream *stream, int additional_amount, int total_amount)
 {
+    (void) total_amount;
     if (additional_amount == 0) {
         return;  // nothing to actually do yet. This was a courtesy call; the stream still has enough buffered.
     }
@@ -1387,6 +1389,7 @@ static void RemoveTrackFromMixerTagList(MIX_Mixer *mixer, MIX_Track *track, cons
 {
     const SDL_PropertiesID track_tags = track->mixer->track_tags;
     MIX_TagList *list = (MIX_TagList *) SDL_GetPointerProperty(track_tags, tag, NULL);
+    (void) mixer;
     if (list) {
         SDL_LockRWLockForWriting(list->rwlock);
         for (size_t i = 0; i < list->num_tracks; i++) {
@@ -1716,6 +1719,7 @@ bool MIX_SetTrackRawIOStream(MIX_Track *track, SDL_IOStream *io, const SDL_Audio
 static void SDLCALL CleanupTagList(void *userdata, void *value)
 {
     MIX_TagList *list = (MIX_TagList *) value;
+    (void) userdata;
     SDL_DestroyRWLock(list->rwlock);
     SDL_free(list->tracks);
     SDL_free(list);

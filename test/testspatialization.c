@@ -13,6 +13,7 @@ static float mouse_x, mouse_y;
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
+    (void) appstate;
     SDL_SetAppMetadata("Test SDL_mixer spatialization", "1.0", "org.libsdl.testmixerspatialization");
 
     if (argc != 2) {
@@ -52,6 +53,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
+    (void) appstate;
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     } else if ((event->type == SDL_EVENT_KEY_DOWN) && (event->key.key == SDLK_ESCAPE)) {
@@ -84,6 +86,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     SDL_FPoint sourcept;
     MIX_Point3D position;
 
+    (void) appstate;
     position.y = 0.0f;  // always horizontal.
 
     if (autopilot) {  // run in a horizontal circle around the listener (circling on X and Z coordinates).
@@ -131,6 +134,8 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
+    (void) appstate;
+    (void) result;
     // SDL will clean up the window/renderer for us.
     // SDL_mixer will clean up the tracks and audio.
     MIX_Quit();

@@ -68,6 +68,7 @@ static bool SDLCALL RAW_init_track(void *audio_userdata, SDL_IOStream *io, const
 {
     SDL_assert(audio_userdata == NULL);  // no state.
     RAW_TrackData *tdata = (RAW_TrackData *) SDL_calloc(1, sizeof (*tdata));
+    (void) props;
     if (!tdata) {
         return false;
     }

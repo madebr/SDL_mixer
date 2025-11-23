@@ -9,6 +9,7 @@ static SDL_AudioSpec spec;
 static void SDLCALL AudioDeviceCallback(void *userdata, SDL_AudioStream *stream, int additional_amount, int total_amount)
 {
     MIX_AudioDecoder *audiodecoder = (MIX_AudioDecoder *) userdata;
+    (void) total_amount;
     if (!additional_amount) {
         return;
     }
@@ -29,6 +30,7 @@ static void SDLCALL AudioDeviceCallback(void *userdata, SDL_AudioStream *stream,
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
+    (void) appstate;
     SDL_SetAppMetadata("Test SDL_mixer MIX_AudioDecoder", "1.0", "org.libsdl.testmixeraudiodecoder");
 
     /* this doesn't have to run very much, so give up tons of CPU time between iterations. */
@@ -68,6 +70,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
+    (void) appstate;
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     }
@@ -76,11 +79,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
+    (void) appstate;
     return done ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 }
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
+    (void) appstate;
+    (void) result;
     // SDL will clean up the audio device for us.
     MIX_Quit();    // SDL_mixer will clean up the audiodecoder.
 }
